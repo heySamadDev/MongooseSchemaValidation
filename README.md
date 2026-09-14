@@ -2,7 +2,7 @@
 
 A RESTful Course Management API built with **Node.js, Express.js, MongoDB, and Mongoose**.
 
-This project was created as a practice assignment to understand **MVC architecture, Mongoose schema validation, centralized error handling, and reusable API utilities**.
+This project was created as a practice assignment to understand **MVC architecture, Mongoose schema validation, centralized error handling, reusable API utilities, and request logging**.
 
 ## 🚀 Features
 
@@ -19,6 +19,9 @@ This project was created as a practice assignment to understand **MVC architectu
 - Automatic timestamps using Mongoose
 - MongoDB Atlas database connection
 - Validation during course updates
+- Request logging middleware
+- Client IP address logging
+- Server request logs stored in `server.log`
 
 ## 🛠️ Tech Stack
 
@@ -27,6 +30,8 @@ This project was created as a practice assignment to understand **MVC architectu
 - **MongoDB Atlas**
 - **Mongoose**
 - **dotenv**
+- **File System (`fs`)**
+- **Path (`path`)**
 
 ## 📁 Project Structure
 
@@ -46,17 +51,21 @@ project/
 │   │   └── index.js
 │   │
 │   ├── middlewares/
-│   │   └── error.middleware.js
+│   │   ├── error.middleware.js
+│   │   └── logger.middleware.js
 │   │
 │   ├── utils/
 │   │   ├── ApiError.js
 │   │   ├── ApiResponse.js
 │   │   └── asyncHandler.js
 │   │
+│   ├── Data/
+│   │   └── server.log
+│   │
 │   ├── app.js
-│   └── server.js
+│   ├── server.js
+│   └── .env
 │
-├── .env
 ├── .gitignore
 ├── package.json
 └── README.md
@@ -80,7 +89,7 @@ Each course contains the following fields:
 
 The schema also uses:
 
-- Required fields
+- Required field validation
 - String trimming
 - Minimum and maximum length validation
 - Enum validation
@@ -128,12 +137,18 @@ Returns `404` if the course does not exist.
 PATCH /api/v1/courses/:id
 ```
 
-Updates allowed course fields.
+Updates the allowed course fields.
 
-Schema validation is also applied during updates using:
+Schema validation is applied during updates using:
 
 ```js
 runValidators: true
+```
+
+The updated document is returned using:
+
+```js
+new: true
 ```
 
 ### Delete Course
@@ -146,13 +161,47 @@ Deletes a course by its ID.
 
 Returns `404` if the course does not exist.
 
+## 📝 Request Logging
+
+The application includes a custom request-logging middleware to monitor incoming API requests.
+
+The logger records information such as:
+
+- Client IP address
+- HTTP method
+- Requested URL
+- Request timestamp
+- Request activity
+
+Logs are stored in:
+
+```text
+src/Data/server.log
+```
+
+The application automatically creates the required log directory and log file if they do not already exist.
+
+The logger is registered as Express middleware:
+
+```js
+app.use(logRequest);
+```
+
+This helps with:
+
+- API monitoring
+- Debugging
+- Tracking incoming requests
+- Understanding API activity
+- Maintaining a record of server requests
+
 ## ⚠️ Error Handling
 
 The application uses centralized error handling.
 
 Errors from controllers and Mongoose are passed through `asyncHandler` to the centralized error middleware.
 
-Example error response:
+Example validation error:
 
 ```json
 {
@@ -194,16 +243,16 @@ npm install
 
 ## 🔐 Environment Variables
 
-Create a `.env` file in the project root:
+Create a `.env` file inside the `src` directory:
 
 ```env
 PORT=3000
 MONGO_URI=your_mongodb_connection_string
 ```
 
-**Do not commit your actual `.env` file or MongoDB credentials to GitHub.**
+**Important:** Do not commit your actual `.env` file or MongoDB credentials to GitHub.
 
-Add `.env` to `.gitignore`.
+Make sure `.env` is included in your `.gitignore`.
 
 ## ▶️ Running the Project
 
@@ -243,6 +292,7 @@ The API was tested for:
 - Deleting courses
 - Nonexistent course deletion
 - Invalid MongoDB ObjectId handling
+- Request logging
 
 API requests can be tested using **Postman** or another API client.
 
@@ -263,6 +313,10 @@ Through this project, I practiced:
 - Route organization
 - Update validation with Mongoose
 - Environment variable management
+- Request logging
+- Client IP address monitoring
+- Using Node.js `fs` module for log files
+- Using Node.js `path` module for file paths
 
 ## 👨‍💻 Author
 
